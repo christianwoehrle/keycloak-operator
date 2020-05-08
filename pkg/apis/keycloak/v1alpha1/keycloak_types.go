@@ -51,8 +51,21 @@ type KeycloakSpec struct {
 	// Specify PodDisruptionBudget configuration
 	// +optional
 	PodDisruptionBudget PodDisruptionBudgetConfig `json:"podDisruptionBudget,omitempty"`
+	// Specify resources
+	// +optional
+	Resources ResourceRequirements `json:"resources,omitempty"`
+
 }
 
+type ResourceRequirements struct {
+	Limits ResourceList  	`json:"limits,omitempty"`
+	Requests ResourceList	`json:"requests,omitempty"`
+}
+
+type ResourceList struct {
+	Cpu string `json:"cpu,omitempty"`
+	Memory string `json:"memory,omitempty"`
+}
 type KeycloakExternalAccess struct {
 	// If set to true, the Operator will create an Ingress or a Route
 	// pointing to Keycloak.
