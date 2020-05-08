@@ -4,10 +4,60 @@ import (
 	"github.com/keycloak/keycloak-operator/pkg/apis/keycloak/v1alpha1"
 	v13 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const (
+	KeycloakPostgresPodDefaultCpuRequests    = "50m"
+	KeycloakPostgresPodDefaultMemoryRequests = "50Mi"
+)
+
+// How are Resources set:
+// if explicitly defined in the keycloak-cr: use that value
+// otherwise: use sane default
+// How are Limits set:
+// if explicitly defined in the keycloak-cr: use that value
+// DONT assume default
+//https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-default-namespace/
+
+func getPostgresResources(cr *v1alpha1.Keycloak) v1.ResourceRequirements {
+
+	requirements := v1.ResourceRequirements{}
+	requirements.Limits = v1.ResourceList{}
+	requirements.Requests = v1.ResourceList{}
+
+	cpu, err := resource.ParseQuantity(cr.Spec.DeploymentSpec.PostgresDeploymentSpec.ResourceRequirements.Requests.Cpu)
+	if err == nil {
+		requirements.Requests[v1.ResourceCPU] = cpu
+	} else {
+		cpu, err = resource.ParseQuantity(KeycloakPostgresPodDefaultCpuRequests)
+		if err == nil {
+			requirements.Requests[v1.ResourceCPU] = cpu
+		}
+	}
+	memory, err := resource.ParseQuantity(cr.Spec.DeploymentSpec.PostgresDeploymentSpec.ResourceRequirements.Requests.Memory)
+	if err == nil {
+		requirements.Requests[v1.ResourceMemory] = memory
+	} else {
+		memory, err = resource.ParseQuantity(KeycloakPostgresPodDefaultCpuRequests)
+		if err == nil {
+			requirements.Requests[v1.ResourceMemory] = memory
+		}
+	}
+
+	cpu, err = resource.ParseQuantity(cr.Spec.DeploymentSpec.PostgresDeploymentSpec.ResourceRequirements.Limits.Cpu)
+	if err == nil {
+		requirements.Limits[v1.ResourceCPU] = cpu
+	}
+	memory, err = resource.ParseQuantity(cr.Spec.DeploymentSpec.PostgresDeploymentSpec.ResourceRequirements.Limits.Memory)
+	if err == nil {
+		requirements.Limits[v1.ResourceMemory] = memory
+	}
+	return requirements
+}
 
 func PostgresqlDeployment(cr *v1alpha1.Keycloak) *v13.Deployment {
 	return &v13.Deployment{
@@ -102,6 +152,7 @@ func PostgresqlDeployment(cr *v1alpha1.Keycloak) *v13.Deployment {
 									MountPath: "/var/lib/pgsql/data",
 								},
 							},
+							Resources: getPostgresResources(cr),
 						},
 					},
 					Volumes: []v1.Volume{
@@ -202,6 +253,7 @@ func PostgresqlDeploymentReconciled(cr *v1alpha1.Keycloak, currentState *v13.Dep
 					MountPath: "/var/lib/postgresql/data",
 				},
 			},
+			Resources: getPostgresResources(cr),
 		},
 	}
 	reconciled.Spec.Template.Spec.Volumes = []v1.Volume{

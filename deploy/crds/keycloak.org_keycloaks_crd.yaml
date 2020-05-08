@@ -31,6 +31,53 @@ spec:
         spec:
           description: KeycloakSpec defines the desired state of Keycloak
           properties:
+            deploymentSpec:
+              description: Resources (Requests and Limits) for KeycloakDeployment
+                and PostgresDeployment
+              properties:
+                keycloakDeploymentSpec:
+                  description: Resources (Requests and Limits) for the KeycloakPods
+                  properties:
+                    resources:
+                      properties:
+                        limits:
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                          type: object
+                        requests:
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+                postgresDeploymentSpec:
+                  description: Resources (Requests and Limits) for the PostgresPod
+                  properties:
+                    resources:
+                      properties:
+                        limits:
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                          type: object
+                        requests:
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                          type: object
+                      type: object
+                  type: object
+              type: object
             extensions:
               description: A list of extensions, where each one is a URL to a JAR
                 files that will be deployed in Keycloak.

@@ -51,6 +51,36 @@ type KeycloakSpec struct {
 	// Specify PodDisruptionBudget configuration
 	// +optional
 	PodDisruptionBudget PodDisruptionBudgetConfig `json:"podDisruptionBudget,omitempty"`
+	// Resources (Requests and Limits) for KeycloakDeployment and PostgresDeployment
+	// +optional
+	DeploymentSpec DeploymentSpec `json:"deploymentSpec,omitempty"`
+}
+
+type DeploymentSpec struct {
+	// Resources (Requests and Limits) for the KeycloakPods
+	// +optional
+	KeycloakDeploymentSpec KeycloakDeploymentSpec `json:"keycloakDeploymentSpec,omitempty"`
+	// Resources (Requests and Limits) for the PostgresPod
+	// +optional
+	PostgresDeploymentSpec PostgresDeploymentSpec `json:"postgresDeploymentSpec,omitempty"`
+}
+
+type KeycloakDeploymentSpec struct {
+	ResourceRequirements ResourceRequirements `json:"resources,omitempty"`
+}
+
+type PostgresDeploymentSpec struct {
+	ResourceRequirements ResourceRequirements `json:"resources,omitempty"`
+}
+
+type ResourceRequirements struct {
+	Limits   ResourceList `json:"limits,omitempty"`
+	Requests ResourceList `json:"requests,omitempty"`
+}
+
+type ResourceList struct {
+	Cpu    string `json:"cpu,omitempty"`
+	Memory string `json:"memory,omitempty"`
 }
 
 type TLSTerminationType string
